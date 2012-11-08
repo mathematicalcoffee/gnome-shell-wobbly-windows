@@ -270,7 +270,10 @@ const WobblyWindowEffect = new Lang.Class({
     },
 
     remove: function() {
-        this.get_actor().remove_effect(this);
+        let act = this.get_actor();
+        if (act) {
+            act.remove_effect(this);
+        }
     },
 
     _newFrame: function() {
@@ -372,14 +375,16 @@ const WobblyWindowEffect = new Lang.Class({
     //     this._paintDebug();
     // },
 
-    vfunc_notify: function(effect, pspec) {
+    // UPTO (pspec is undefined)
+    vfunc_notify: function(pspec) {
         // If someone changes the tile properties on us, make sure
         // to build a new model next time.
         if (pspec.name == "x-tiles" || pspec.name == "y-tiles" && this._hasModel)
             this._invalidateModel();
+        //this.parent(pspec);
     },
 
-    vfunc_deform_vertex: function(effect, width, height, vertex) {
+    vfunc_deform_vertex: function(width, height, vertex) {
         let i = Math.floor(vertex.tx * this.x_tiles);
         let j = Math.floor(vertex.ty * this.y_tiles);
         let obj = this._objectAt(i, j);
@@ -397,10 +402,10 @@ const WobblyWindowEffect = new Lang.Class({
             vertex.z = 1;
     },
 
-    vfunc_set_actor: function(effect, actor) {
+    vfunc_set_actor: function(actor) {
         let oldActor = this.get_actor();
 
-        if (this._allocationChangedId > 0) {
+        if (oldActor && this._allocationChangedId > 0) {
             oldActor.disconnect(this._allocationChangedId);
             this._allocationChangedId = 0;
         }
@@ -429,7 +434,7 @@ const WobblyWindowEffect = new Lang.Class({
 let _beginGrabOpId;
 let _endGrabOpId;
 
-function onBeginGrabOp(display, op, window) {
+function onBeginGrabOp(display, screen, window, op) {
     if (window.is_override_redirect())
         return;
 
@@ -449,7 +454,7 @@ function onBeginGrabOp(display, op, window) {
     effect.setAnchorPosition(x, y);
 }
 
-function onEndGrabOp(display, op, window) {
+function onEndGrabOp(display, screen, window, op) {
     if (window.is_override_redirect())
         return;
 
@@ -467,8 +472,8 @@ function init() {
 }
 
 function enable() {
-    _beginGrabOpId = global.display.connect('begin-grab-op', onBeginGrabOp);
-    _endGrabOpId = global.display.connect('end-grab-op', onEndGrabOp);
+    _beginGrabOpId = global.display.connect('grab-op-begin', onBeginGrabOp);
+    _endGrabOpId = global.display.connect('grab-op-end', onEndGrabOp);
 }
 
 function disable() {

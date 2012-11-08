@@ -1,1 +1,6 @@
-{"shell-version": ["3.3.90"], "uuid": "wobbly-windows@mecheye.net", "name": "Wobbly Windows", "description": "Compiz shall live again!"}
+{
+    "shell-version": ["3.4"],
+    "uuid": "wobbly-windows@mecheye.net",
+    "name": "Wobbly Windows",
+    "description": "Compiz shall live again!"
+}
